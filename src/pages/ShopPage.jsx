@@ -2,65 +2,60 @@ import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import ProductCard from '../components/ProductCard';
 import ProductDetail from '../components/ProductDetail';
-import { setProducts } from '../store/redux/actions'; // Import action untuk menyimpan produk
+import { setProducts } from '../store/redux/actions';
 import Swal from 'sweetalert2';
 
 const ShopPage = () => {
   const dispatch = useDispatch();
-  const products = useSelector((state) => state.products.products); // Ambil produk dari Redux store
+  const products = useSelector((state) => state.products.products);
   const { isLoggedIn } = useSelector((state) => state.auth);
   const [filteredProducts, setFilteredProducts] = useState([]);
   const [categories, setCategories] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState('');
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [buyProduct, setBuyProduct] = useState(null);
-  const [quantity, setQuantity] = useState(1);
   const [size, setSize] = useState('');
 
-  // Default API URL jika environment variables tidak tersedia
   const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || 'https://fakestoreapi.com';
 
+  // Fungsi untuk generate stok acak
+  const generateRandomStock = () => Math.floor(Math.random() * 20) + 1;
+
   useEffect(() => {
-    if (typeof window !== "undefined") {
+    if (typeof window !== 'undefined') {
       const storedProducts = JSON.parse(localStorage.getItem('products'));
       if (storedProducts && storedProducts.length > 0) {
-        dispatch(setProducts(storedProducts)); // Update Redux dengan produk dari localStorage
+        dispatch(setProducts(storedProducts));
         setFilteredProducts(storedProducts);
         const uniqueCategories = [...new Set(storedProducts.map((product) => product.category))];
         setCategories(uniqueCategories);
       } else {
-        loadProductsFromAPI(); // Fetch dari API jika localStorage kosong
+        loadProductsFromAPI();
       }
     }
-  }, [apiBaseUrl, dispatch]);
+  }, [dispatch]);
 
-  // Fungsi untuk menambahkan stok acak ke produk
-  const generateRandomStock = () => {
-    return Math.floor(Math.random() * 20) + 1; // Stok acak antara 1 sampai 20
-  };
-
-  // Memuat produk dari API dan menambahkan stok acak
+  // Fungsi untuk memuat produk dari API
   const loadProductsFromAPI = async () => {
     try {
       const response = await fetch(`${apiBaseUrl}/products`);
       const data = await response.json();
 
-      // Menambahkan stok acak ke setiap produk
+      // Tambahkan stok secara dinamis
       const updatedProducts = data.map((product) => ({
         ...product,
-        stock: generateRandomStock(), // Stok acak untuk setiap produk
+        stock: generateRandomStock(),
       }));
 
       // Simpan ke localStorage dan Redux
       localStorage.setItem('products', JSON.stringify(updatedProducts));
-      dispatch(setProducts(updatedProducts)); // Update Redux dengan data produk yang sudah diupdate stoknya
+      dispatch(setProducts(updatedProducts));
       setFilteredProducts(updatedProducts);
 
-      // Ambil kategori unik
       const uniqueCategories = [...new Set(updatedProducts.map((product) => product.category))];
       setCategories(uniqueCategories);
     } catch (error) {
-      console.error('Error loading products:', error);
+      console.error('Failed to load products:', error);
       Swal.fire({
         title: 'Error!',
         text: 'Failed to load products from the server.',
@@ -87,16 +82,13 @@ const ShopPage = () => {
         icon: 'error',
         confirmButtonText: 'OK',
       });
-      return; // Jangan tambahkan ke cart jika stok habis
+      return;
     }
 
     const cart = JSON.parse(localStorage.getItem('cart')) || [];
-    const existingProductIndex = cart.findIndex(
-      (item) => item.id === product.id && item.size === size
-    );
+    const existingProductIndex = cart.findIndex((item) => item.id === product.id && item.size === size);
 
     if (existingProductIndex !== -1) {
-      // Jika produk dengan ukuran yang sama sudah ada, hanya tambah quantity
       if (cart[existingProductIndex].quantity < product.stock) {
         cart[existingProductIndex].quantity += 1;
       } else {
@@ -108,20 +100,18 @@ const ShopPage = () => {
         });
       }
     } else {
-      // Jika produk belum ada, tambah produk baru ke cart
       cart.push({ ...product, quantity: 1, size });
     }
 
-    // Update cart di localStorage
-    localStorage.setItem('cart', JSON.stringify(cart));
-
-    // Update stok produk di localStorage
     const updatedProducts = [...products];
     const productIndex = updatedProducts.findIndex((p) => p.id === product.id);
     if (productIndex !== -1) {
-      updatedProducts[productIndex].stock -= 1; // Mengurangi stok
+      updatedProducts[productIndex].stock = Math.max(0, updatedProducts[productIndex].stock - 1);
     }
-    localStorage.setItem('products', JSON.stringify(updatedProducts)); // Update stok produk di localStorage
+
+    localStorage.setItem('cart', JSON.stringify(cart));
+    localStorage.setItem('products', JSON.stringify(updatedProducts));
+    dispatch(setProducts(updatedProducts));
 
     Swal.fire({
       title: 'Added to Cart!',
@@ -132,7 +122,6 @@ const ShopPage = () => {
     });
 
     setSize('');
-    setQuantity(1);
   };
 
   const handleBuyNow = () => {
@@ -143,7 +132,7 @@ const ShopPage = () => {
         icon: 'error',
         confirmButtonText: 'OK',
       });
-      return; // Jangan lanjutkan jika stok habis
+      return;
     }
 
     Swal.fire({
@@ -155,7 +144,7 @@ const ShopPage = () => {
     }).then((result) => {
       if (result.isConfirmed) {
         handleAddToCart(buyProduct);
-        setBuyProduct(null); // Tutup modal Buy Now
+        setBuyProduct(null);
         Swal.fire({
           title: 'Purchase Successful',
           text: 'Product has been added to your cart.',
@@ -170,7 +159,6 @@ const ShopPage = () => {
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="flex">
-        {/* Sidebar Filter */}
         <div className="w-1/4 p-4">
           <h2 className="text-xl font-bold mb-4">Filters</h2>
           <select
@@ -186,8 +174,6 @@ const ShopPage = () => {
             ))}
           </select>
         </div>
-
-        {/* Daftar Produk */}
         <div className="w-3/4">
           <h1 className="text-3xl font-bold text-center mb-8">Products</h1>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
@@ -195,12 +181,21 @@ const ShopPage = () => {
               <ProductCard
                 key={product.id}
                 product={product}
-                openModal={() => setSelectedProduct(product)} // Buka modal untuk detail produk
-                addToCart={(p) => handleAddToCart(p)} // Dikirimkan fungsi handleAddToCart
+                openModal={() => setSelectedProduct(product)}
+                addToCart={(p) => handleAddToCart(p)}
                 isLoggedIn={isLoggedIn}
                 onBuyNow={() => {
                   if (isLoggedIn) {
-                    setBuyProduct(product); // Menampilkan modal Buy Now
+                    if (product.stock > 0) {
+                      setBuyProduct(product);
+                    } else {
+                      Swal.fire({
+                        title: 'Out of Stock!',
+                        text: 'This product is out of stock.',
+                        icon: 'error',
+                        confirmButtonText: 'OK',
+                      });
+                    }
                   } else {
                     Swal.fire({
                       title: 'You need to log in!',
@@ -208,7 +203,7 @@ const ShopPage = () => {
                       icon: 'warning',
                       confirmButtonText: 'Go to Login',
                     }).then(() => {
-                      window.location.href = '/login'; // Arahkan ke halaman login
+                      window.location.href = '/login';
                     });
                   }
                 }}
@@ -217,16 +212,12 @@ const ShopPage = () => {
           </div>
         </div>
       </div>
-
-      {/* Modal untuk ProductDetail */}
       {selectedProduct && (
         <ProductDetail
           product={selectedProduct}
-          onClose={() => setSelectedProduct(null)} // Tutup modal
+          onClose={() => setSelectedProduct(null)}
         />
       )}
-
-      {/* Modal untuk Buy Now */}
       {buyProduct && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
           <div className="bg-white p-6 rounded-lg w-11/12 md:w-2/3 lg:w-1/2 relative">
@@ -240,7 +231,7 @@ const ShopPage = () => {
             </button>
             <button
               className="absolute top-4 right-4 text-gray-600 hover:text-black text-lg"
-              onClick={() => setBuyProduct(null)} // Tutup modal
+              onClick={() => setBuyProduct(null)}
             >
               ✖
             </button>
