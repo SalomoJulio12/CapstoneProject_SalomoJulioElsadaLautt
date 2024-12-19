@@ -46,7 +46,7 @@ const ShopPage = () => {
       // Menambahkan stok default ke setiap produk jika tidak ada stok
       const updatedProducts = data.map((product) => ({
         ...product,
-        stock: product.stock || 10, // Gunakan stok dari API atau set default 10
+        stock: 10, // Menambahkan stok default jika tidak ada stok pada produk
       }));
 
       console.log('Produk dengan stok setelah update:', updatedProducts); // Log produk dengan stok
