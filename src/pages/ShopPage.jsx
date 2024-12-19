@@ -13,7 +13,7 @@ const ShopPage = () => {
   const [categories, setCategories] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState('');
   const [selectedProduct, setSelectedProduct] = useState(null);
-  const [buyProduct, setBuyProduct] = useState(null);
+  const [cart, setCart] = useState([]);
   const [size, setSize] = useState('');
 
   const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || 'https://fakestoreapi.com';
@@ -25,10 +25,11 @@ const ShopPage = () => {
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const storedProducts = JSON.parse(localStorage.getItem('products'));
+      const storedCart = JSON.parse(localStorage.getItem('cart')) || [];
       if (storedProducts && storedProducts.length > 0) {
-        console.log("Produk dari localStorage:", storedProducts); // Debug
         dispatch(setProducts(storedProducts));
         setFilteredProducts(storedProducts);
+        setCart(storedCart);
         const uniqueCategories = [...new Set(storedProducts.map((product) => product.category))];
         setCategories(uniqueCategories);
       } else {
@@ -81,44 +82,19 @@ const ShopPage = () => {
 
   // Menambahkan produk ke keranjang
   const handleAddToCart = (product) => {
-    if (!product.stock || product.stock <= 0) {
-      Swal.fire({
-        title: 'Out of Stock!',
-        text: 'This product is out of stock.',
-        icon: 'error',
-        confirmButtonText: 'OK',
-      });
-      return;
-    }
-
-    const cart = JSON.parse(localStorage.getItem('cart')) || [];
-    const updatedProducts = [...products];
-
-    const existingProductIndex = cart.findIndex((item) => item.id === product.id && item.size === size);
+    const existingCart = [...cart];
+    const existingProductIndex = existingCart.findIndex(
+      (item) => item.id === product.id && item.size === size
+    );
 
     if (existingProductIndex !== -1) {
-      if (cart[existingProductIndex].quantity < product.stock) {
-        cart[existingProductIndex].quantity += 1;
-      } else {
-        Swal.fire({
-          title: 'Out of Stock!',
-          text: 'You have reached the maximum stock for this product.',
-          icon: 'error',
-          confirmButtonText: 'OK',
-        });
-      }
+      existingCart[existingProductIndex].quantity += 1;
     } else {
-      cart.push({ ...product, quantity: 1, size });
+      existingCart.push({ ...product, quantity: 1, size });
     }
 
-    const productIndex = updatedProducts.findIndex((p) => p.id === product.id);
-    if (productIndex !== -1) {
-      updatedProducts[productIndex].stock = Math.max(0, updatedProducts[productIndex].stock - 1);
-    }
-
-    localStorage.setItem('cart', JSON.stringify(cart));
-    localStorage.setItem('products', JSON.stringify(updatedProducts)); // Simpan stok yang diperbarui
-    dispatch(setProducts(updatedProducts));
+    setCart(existingCart);
+    localStorage.setItem('cart', JSON.stringify(existingCart)); // Simpan keranjang ke localStorage
 
     Swal.fire({
       title: 'Added to Cart!',
@@ -131,36 +107,30 @@ const ShopPage = () => {
     setSize('');
   };
 
-  // Membeli produk langsung
-  const handleBuyNow = () => {
-    if (!buyProduct || buyProduct.stock <= 0) {
-      Swal.fire({
-        title: 'Out of Stock!',
-        text: 'This product is out of stock.',
-        icon: 'error',
-        confirmButtonText: 'OK',
-      });
-      return;
-    }
+  // Proses checkout
+  const handleCheckout = () => {
+    const updatedProducts = [...products];
+    cart.forEach((cartItem) => {
+      const productIndex = updatedProducts.findIndex((p) => p.id === cartItem.id);
+      if (productIndex !== -1) {
+        updatedProducts[productIndex].stock = Math.max(
+          0,
+          updatedProducts[productIndex].stock - cartItem.quantity
+        );
+      }
+    });
+
+    // Simpan produk yang diperbarui ke Redux dan localStorage
+    dispatch(setProducts(updatedProducts));
+    localStorage.setItem('products', JSON.stringify(updatedProducts));
+    setCart([]); // Kosongkan keranjang
+    localStorage.setItem('cart', JSON.stringify([])); // Kosongkan keranjang di localStorage
 
     Swal.fire({
-      title: 'Confirm Purchase',
-      text: `Do you want to buy ${buyProduct.title}?`,
-      icon: 'question',
-      showCancelButton: true,
-      confirmButtonText: 'Yes, Buy Now',
-    }).then((result) => {
-      if (result.isConfirmed) {
-        handleAddToCart(buyProduct);
-        setBuyProduct(null);
-        Swal.fire({
-          title: 'Purchase Successful',
-          text: 'Product has been added to your cart.',
-          icon: 'success',
-          timer: 1500,
-          showConfirmButton: false,
-        });
-      }
+      title: 'Checkout Successful!',
+      text: 'Your order has been placed successfully.',
+      icon: 'success',
+      confirmButtonText: 'OK',
     });
   };
 
@@ -192,59 +162,34 @@ const ShopPage = () => {
                 openModal={() => setSelectedProduct(product)}
                 addToCart={(p) => handleAddToCart(p)}
                 isLoggedIn={isLoggedIn}
-                onBuyNow={() => {
-                  if (isLoggedIn) {
-                    if (product.stock > 0) {
-                      setBuyProduct(product);
-                    } else {
-                      Swal.fire({
-                        title: 'Out of Stock!',
-                        text: 'This product is out of stock.',
-                        icon: 'error',
-                        confirmButtonText: 'OK',
-                      });
-                    }
-                  } else {
-                    Swal.fire({
-                      title: 'You need to log in!',
-                      text: 'Please log in to buy this product.',
-                      icon: 'warning',
-                      confirmButtonText: 'Go to Login',
-                    }).then(() => {
-                      window.location.href = '/login';
-                    });
-                  }
-                }}
               />
             ))}
           </div>
         </div>
       </div>
+      {cart.length > 0 && (
+        <div className="p-4">
+          <h2 className="text-xl font-bold mb-4">Your Cart</h2>
+          <ul>
+            {cart.map((item, index) => (
+              <li key={index}>
+                {item.title} - {item.quantity} pcs
+              </li>
+            ))}
+          </ul>
+          <button
+            onClick={handleCheckout}
+            className="bg-black text-white px-6 py-3 rounded-md hover:bg-gray-800 mt-4"
+          >
+            Checkout
+          </button>
+        </div>
+      )}
       {selectedProduct && (
         <ProductDetail
           product={selectedProduct}
           onClose={() => setSelectedProduct(null)}
         />
-      )}
-      {buyProduct && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
-          <div className="bg-white p-6 rounded-lg w-11/12 md:w-2/3 lg:w-1/2 relative">
-            <h2 className="text-2xl font-bold mb-4">{buyProduct.title}</h2>
-            <p className="text-lg font-semibold text-gray-800 mb-2">${buyProduct.price}</p>
-            <button
-              className="bg-black text-white px-6 py-3 rounded-md hover:bg-gray-800"
-              onClick={handleBuyNow}
-            >
-              Confirm Purchase
-            </button>
-            <button
-              className="absolute top-4 right-4 text-gray-600 hover:text-black text-lg"
-              onClick={() => setBuyProduct(null)}
-            >
-              ✖
-            </button>
-          </div>
-        </div>
       )}
     </div>
   );
