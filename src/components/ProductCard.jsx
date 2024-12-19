@@ -59,7 +59,9 @@ const ProductCard = ({ product, openModal, addToCart, isLoggedIn }) => {
       <div className="p-4">
         <h3 className="font-semibold text-lg mb-2 truncate">{title}</h3>
         <p className="text-gray-600 font-bold mb-4">${price.toFixed(2)}</p>
-        <p className="text-gray-600 mb-4">Stock Available: {stock !== undefined ? stock : 'Not Available'}</p>
+        <p className="text-gray-600 mb-4">
+          Stock Available: {stock !== undefined ? stock : 'Not Available'}
+        </p>
 
         {/* Tombol View Detail dan Add to Cart */}
         <div className="flex flex-col sm:flex-row gap-4 sm:gap-8">
