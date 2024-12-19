@@ -40,12 +40,15 @@ const ShopPage = () => {
     try {
       const response = await fetch(`${apiBaseUrl}/products`);
       const data = await response.json();
-
+      
       // Menambahkan stok default ke setiap produk
       const updatedProducts = data.map((product) => ({
         ...product,
         stock: 10, // Stok default 10 untuk setiap produk
       }));
+
+      // Log untuk memeriksa produk yang sudah di-update
+      console.log('Produk dengan stok:', updatedProducts);
 
       // Simpan ke localStorage dan Redux
       localStorage.setItem('products', JSON.stringify(updatedProducts));
@@ -117,12 +120,7 @@ const ShopPage = () => {
     if (productIndex !== -1) {
       updatedProducts[productIndex].stock -= 1; // Mengurangi stok
     }
-
-    // Simpan kembali produk yang sudah terupdate di localStorage
-    localStorage.setItem('products', JSON.stringify(updatedProducts));
-
-    // Update Redux dengan produk yang telah terupdate
-    dispatch(setProducts(updatedProducts));
+    localStorage.setItem('products', JSON.stringify(updatedProducts)); // Update stok produk di localStorage
 
     Swal.fire({
       title: 'Added to Cart!',
