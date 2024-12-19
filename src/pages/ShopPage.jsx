@@ -25,6 +25,7 @@ const ShopPage = () => {
     if (typeof window !== 'undefined') {
       const storedProducts = JSON.parse(localStorage.getItem('products'));
       if (storedProducts && storedProducts.length > 0) {
+        console.log("Produk dari localStorage:", storedProducts); // Debug
         dispatch(setProducts(storedProducts));
         setFilteredProducts(storedProducts);
         const uniqueCategories = [...new Set(storedProducts.map((product) => product.category))];
@@ -35,7 +36,7 @@ const ShopPage = () => {
     }
   }, [dispatch]);
 
-  // Fungsi untuk memuat produk dari API
+  // Fungsi untuk memuat produk dari API dan menambahkan stok
   const loadProductsFromAPI = async () => {
     try {
       const response = await fetch(`${apiBaseUrl}/products`);
@@ -47,7 +48,9 @@ const ShopPage = () => {
         stock: generateRandomStock(),
       }));
 
-      // Simpan ke localStorage dan Redux
+      console.log("Produk setelah ditambahkan stok:", updatedProducts); // Debug
+
+      // Simpan produk ke local storage dan Redux
       localStorage.setItem('products', JSON.stringify(updatedProducts));
       dispatch(setProducts(updatedProducts));
       setFilteredProducts(updatedProducts);
@@ -86,6 +89,8 @@ const ShopPage = () => {
     }
 
     const cart = JSON.parse(localStorage.getItem('cart')) || [];
+    const updatedProducts = [...products];
+
     const existingProductIndex = cart.findIndex((item) => item.id === product.id && item.size === size);
 
     if (existingProductIndex !== -1) {
@@ -103,14 +108,13 @@ const ShopPage = () => {
       cart.push({ ...product, quantity: 1, size });
     }
 
-    const updatedProducts = [...products];
     const productIndex = updatedProducts.findIndex((p) => p.id === product.id);
     if (productIndex !== -1) {
       updatedProducts[productIndex].stock = Math.max(0, updatedProducts[productIndex].stock - 1);
     }
 
     localStorage.setItem('cart', JSON.stringify(cart));
-    localStorage.setItem('products', JSON.stringify(updatedProducts));
+    localStorage.setItem('products', JSON.stringify(updatedProducts)); // Simpan stok yang diperbarui
     dispatch(setProducts(updatedProducts));
 
     Swal.fire({
