@@ -25,6 +25,7 @@ const ShopPage = () => {
     if (typeof window !== "undefined") {
       const storedProducts = JSON.parse(localStorage.getItem('products'));
       if (storedProducts && storedProducts.length > 0) {
+        console.log('Produk yang diambil dari localStorage:', storedProducts);
         dispatch(setProducts(storedProducts)); // Update Redux dengan produk dari localStorage
         setFilteredProducts(storedProducts);
         const uniqueCategories = [...new Set(storedProducts.map((product) => product.category))];
@@ -52,13 +53,17 @@ const ShopPage = () => {
       console.log('Produk dengan stok acak:', updatedProducts); // Log produk dengan stok acak
 
       // Simpan ke localStorage dan Redux
-      localStorage.setItem('products', JSON.stringify(updatedProducts));
+      localStorage.setItem('products', JSON.stringify(updatedProducts)); // Simpan produk dengan stok ke localStorage
       dispatch(setProducts(updatedProducts)); // Update Redux dengan data produk yang sudah diupdate stoknya
       setFilteredProducts(updatedProducts);
 
       // Ambil kategori unik
       const uniqueCategories = [...new Set(updatedProducts.map((product) => product.category))];
       setCategories(uniqueCategories);
+
+      // Cek produk yang sudah disimpan di localStorage
+      const storedProductsAfterSave = JSON.parse(localStorage.getItem('products'));
+      console.log('Produk setelah disimpan di localStorage:', storedProductsAfterSave); // Cek apakah data sudah ada di localStorage
     } catch (error) {
       console.error('Error loading products:', error);
       Swal.fire({
