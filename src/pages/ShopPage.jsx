@@ -43,13 +43,13 @@ const ShopPage = () => {
 
       console.log('Data produk dari API:', data); // Cek data yang diterima
 
-      // Menambahkan stok default ke setiap produk jika tidak ada stok
+      // Menambahkan stok acak ke setiap produk
       const updatedProducts = data.map((product) => ({
         ...product,
-        stock: 10, // Menambahkan stok default jika tidak ada stok pada produk
+        stock: getRandomStock(), // Menambahkan stok acak
       }));
 
-      console.log('Produk dengan stok setelah update:', updatedProducts); // Log produk dengan stok
+      console.log('Produk dengan stok acak:', updatedProducts); // Log produk dengan stok acak
 
       // Simpan ke localStorage dan Redux
       localStorage.setItem('products', JSON.stringify(updatedProducts));
@@ -68,6 +68,11 @@ const ShopPage = () => {
         confirmButtonText: 'OK',
       });
     }
+  };
+
+  // Fungsi untuk menghasilkan stok acak antara 1 hingga 100
+  const getRandomStock = () => {
+    return Math.floor(Math.random() * 100) + 1; // Menghasilkan stok acak antara 1 hingga 100
   };
 
   const handleCategoryChange = (category) => {
