@@ -13,23 +13,18 @@ const ShopPage = () => {
   const [categories, setCategories] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState('');
   const [selectedProduct, setSelectedProduct] = useState(null);
-  const [cart, setCart] = useState([]);
   const [size, setSize] = useState('');
 
   const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || 'https://fakestoreapi.com';
 
-  // Fungsi untuk generate stok acak
   const generateRandomStock = () => Math.floor(Math.random() * 20) + 1;
 
-  // Memuat produk saat komponen di-mount
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const storedProducts = JSON.parse(localStorage.getItem('products'));
-      const storedCart = JSON.parse(localStorage.getItem('cart')) || [];
       if (storedProducts && storedProducts.length > 0) {
         dispatch(setProducts(storedProducts));
         setFilteredProducts(storedProducts);
-        setCart(storedCart);
         const uniqueCategories = [...new Set(storedProducts.map((product) => product.category))];
         setCategories(uniqueCategories);
       } else {
@@ -38,21 +33,18 @@ const ShopPage = () => {
     }
   }, [dispatch]);
 
-  // Fungsi untuk memuat produk dari API dan menambahkan stok
   const loadProductsFromAPI = async () => {
     try {
       const response = await fetch(`${apiBaseUrl}/products`);
       const data = await response.json();
 
-      // Tambahkan properti stok
       const updatedProducts = data.map((product) => ({
         ...product,
         stock: generateRandomStock(),
       }));
 
-      console.log("Produk setelah ditambahkan stok:", updatedProducts); // Debug
+      console.log("Produk setelah ditambahkan stok:", updatedProducts);
 
-      // Simpan produk ke localStorage dan Redux
       localStorage.setItem('products', JSON.stringify(updatedProducts));
       dispatch(setProducts(updatedProducts));
       setFilteredProducts(updatedProducts);
@@ -70,7 +62,6 @@ const ShopPage = () => {
     }
   };
 
-  // Mengubah kategori yang dipilih
   const handleCategoryChange = (category) => {
     setSelectedCategory(category);
     if (category === '') {
@@ -80,21 +71,19 @@ const ShopPage = () => {
     }
   };
 
-  // Menambahkan produk ke keranjang
   const handleAddToCart = (product) => {
-    const existingCart = [...cart];
-    const existingProductIndex = existingCart.findIndex(
+    const cart = JSON.parse(localStorage.getItem('cart')) || [];
+    const existingProductIndex = cart.findIndex(
       (item) => item.id === product.id && item.size === size
     );
 
     if (existingProductIndex !== -1) {
-      existingCart[existingProductIndex].quantity += 1;
+      cart[existingProductIndex].quantity += 1;
     } else {
-      existingCart.push({ ...product, quantity: 1, size });
+      cart.push({ ...product, quantity: 1, size });
     }
 
-    setCart(existingCart);
-    localStorage.setItem('cart', JSON.stringify(existingCart)); // Simpan keranjang ke localStorage
+    localStorage.setItem('cart', JSON.stringify(cart));
 
     Swal.fire({
       title: 'Added to Cart!',
@@ -105,33 +94,6 @@ const ShopPage = () => {
     });
 
     setSize('');
-  };
-
-  // Proses checkout
-  const handleCheckout = () => {
-    const updatedProducts = [...products];
-    cart.forEach((cartItem) => {
-      const productIndex = updatedProducts.findIndex((p) => p.id === cartItem.id);
-      if (productIndex !== -1) {
-        updatedProducts[productIndex].stock = Math.max(
-          0,
-          updatedProducts[productIndex].stock - cartItem.quantity
-        );
-      }
-    });
-
-    // Simpan produk yang diperbarui ke Redux dan localStorage
-    dispatch(setProducts(updatedProducts));
-    localStorage.setItem('products', JSON.stringify(updatedProducts));
-    setCart([]); // Kosongkan keranjang
-    localStorage.setItem('cart', JSON.stringify([])); // Kosongkan keranjang di localStorage
-
-    Swal.fire({
-      title: 'Checkout Successful!',
-      text: 'Your order has been placed successfully.',
-      icon: 'success',
-      confirmButtonText: 'OK',
-    });
   };
 
   return (
@@ -166,7 +128,15 @@ const ShopPage = () => {
             ))}
           </div>
         </div>
-      </div> 
+      </div>
+
+      {/* Detail Produk */}
+      {selectedProduct && (
+        <ProductDetail
+          product={selectedProduct}
+          onClose={() => setSelectedProduct(null)}
+        />
+      )}
     </div>
   );
 };
