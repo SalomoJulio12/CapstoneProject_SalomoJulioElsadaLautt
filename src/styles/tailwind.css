@@ -1,0 +1,44 @@
+/* Default (untuk layar besar atau lebih besar dari 375px) */
+.product-detail {
+    font-size: 16px;
+    padding: 20px;
+  }
+  
+  .product-name {
+    font-size: 1.2rem;
+  }
+  
+  .product-description {
+    font-size: 0.9rem;
+  }
+  
+  /* Untuk layar 375px ke bawah */
+  @media (max-width: 375px) {
+    .product-detail {
+      font-size: 14px; /* Mengurangi ukuran font untuk tampilan lebih kecil */
+      padding: 15px;  /* Mengurangi padding */
+    }
+  
+    .product-name {
+      font-size: 1rem; /* Ukuran nama produk lebih kecil */
+    }
+  
+    .product-description {
+      font-size: 0.8rem; /* Ukuran deskripsi lebih kecil */
+    }
+  
+    .product-image {
+      width: 100%; /* Gambar produk penuh lebar pada layar kecil */
+      height: auto;
+    }
+  
+    .product-price {
+      font-size: 1rem; /* Ukuran harga lebih kecil */
+    }
+  
+    .add-to-cart-btn {
+      font-size: 0.9rem; /* Tombol diturunkan sedikit */
+      padding: 10px; /* Mengurangi padding tombol */
+    }
+  }
+  
