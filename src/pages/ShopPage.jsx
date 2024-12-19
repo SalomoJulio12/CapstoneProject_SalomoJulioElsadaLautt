@@ -21,11 +21,9 @@ const ShopPage = () => {
   const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || 'https://fakestoreapi.com';
 
   useEffect(() => {
-    // Memeriksa apakah kode dijalankan di browser (klien)
     if (typeof window !== "undefined") {
       const storedProducts = JSON.parse(localStorage.getItem('products'));
       if (storedProducts && storedProducts.length > 0) {
-        console.log('Produk yang diambil dari localStorage:', storedProducts);
         dispatch(setProducts(storedProducts)); // Update Redux dengan produk dari localStorage
         setFilteredProducts(storedProducts);
         const uniqueCategories = [...new Set(storedProducts.map((product) => product.category))];
@@ -36,34 +34,31 @@ const ShopPage = () => {
     }
   }, [apiBaseUrl, dispatch]);
 
-  // Memuat produk dari API jika localStorage kosong
+  // Fungsi untuk menambahkan stok acak ke produk
+  const generateRandomStock = () => {
+    return Math.floor(Math.random() * 20) + 1; // Stok acak antara 1 sampai 20
+  };
+
+  // Memuat produk dari API dan menambahkan stok acak
   const loadProductsFromAPI = async () => {
     try {
       const response = await fetch(`${apiBaseUrl}/products`);
       const data = await response.json();
 
-      console.log('Data produk dari API:', data); // Cek data yang diterima
-
       // Menambahkan stok acak ke setiap produk
       const updatedProducts = data.map((product) => ({
         ...product,
-        stock: getRandomStock(), // Menambahkan stok acak
+        stock: generateRandomStock(), // Stok acak untuk setiap produk
       }));
 
-      console.log('Produk dengan stok acak:', updatedProducts); // Log produk dengan stok acak
-
       // Simpan ke localStorage dan Redux
-      localStorage.setItem('products', JSON.stringify(updatedProducts)); // Simpan produk dengan stok ke localStorage
+      localStorage.setItem('products', JSON.stringify(updatedProducts));
       dispatch(setProducts(updatedProducts)); // Update Redux dengan data produk yang sudah diupdate stoknya
       setFilteredProducts(updatedProducts);
 
       // Ambil kategori unik
       const uniqueCategories = [...new Set(updatedProducts.map((product) => product.category))];
       setCategories(uniqueCategories);
-
-      // Cek produk yang sudah disimpan di localStorage
-      const storedProductsAfterSave = JSON.parse(localStorage.getItem('products'));
-      console.log('Produk setelah disimpan di localStorage:', storedProductsAfterSave); // Cek apakah data sudah ada di localStorage
     } catch (error) {
       console.error('Error loading products:', error);
       Swal.fire({
@@ -73,11 +68,6 @@ const ShopPage = () => {
         confirmButtonText: 'OK',
       });
     }
-  };
-
-  // Fungsi untuk menghasilkan stok acak antara 1 hingga 100
-  const getRandomStock = () => {
-    return Math.floor(Math.random() * 100) + 1; // Menghasilkan stok acak antara 1 hingga 100
   };
 
   const handleCategoryChange = (category) => {
