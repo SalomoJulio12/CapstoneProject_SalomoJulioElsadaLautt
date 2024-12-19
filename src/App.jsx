@@ -12,20 +12,44 @@ const App = () => {
     <Router>
       {/* Tampilkan Navbar hanya jika halaman bukan login */}
       <Routes>
+        {/* Rute utama untuk aplikasi */}
         <Route
-          path="*"
+          path="/"
           element={
             <>
               <Navbar />
-              <Routes>
-                <Route path="/" element={<FeaturedSection />} />
-                <Route path="/shop" element={<ShopPage />} />
-                <Route path="/product/:id" element={<ProductPage />} />
-                <Route path="/cart" element={<CartPage />} /> {/* Tambahkan route cart */}
-              </Routes>
+              <FeaturedSection />
             </>
           }
         />
+        <Route
+          path="/shop"
+          element={
+            <>
+              <Navbar />
+              <ShopPage />
+            </>
+          }
+        />
+        <Route
+          path="/product/:id"
+          element={
+            <>
+              <Navbar />
+              <ProductPage />
+            </>
+          }
+        />
+        <Route
+          path="/cart"
+          element={
+            <>
+              <Navbar />
+              <CartPage />
+            </>
+          }
+        />
+        {/* Halaman Login tanpa Navbar */}
         <Route path="/login" element={<LoginPage />} />
       </Routes>
     </Router>
