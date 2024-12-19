@@ -166,31 +166,7 @@ const ShopPage = () => {
             ))}
           </div>
         </div>
-      </div>
-      {cart.length > 0 && (
-        <div className="p-4">
-          <h2 className="text-xl font-bold mb-4">Your Cart</h2>
-          <ul>
-            {cart.map((item, index) => (
-              <li key={index}>
-                {item.title} - {item.quantity} pcs
-              </li>
-            ))}
-          </ul>
-          <button
-            onClick={handleCheckout}
-            className="bg-black text-white px-6 py-3 rounded-md hover:bg-gray-800 mt-4"
-          >
-            Checkout
-          </button>
-        </div>
-      )}
-      {selectedProduct && (
-        <ProductDetail
-          product={selectedProduct}
-          onClose={() => setSelectedProduct(null)}
-        />
-      )}
+      </div> 
     </div>
   );
 };
