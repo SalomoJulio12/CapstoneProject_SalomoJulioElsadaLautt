@@ -21,6 +21,7 @@ const ShopPage = () => {
   // Fungsi untuk generate stok acak
   const generateRandomStock = () => Math.floor(Math.random() * 20) + 1;
 
+  // Memuat produk saat komponen di-mount
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const storedProducts = JSON.parse(localStorage.getItem('products'));
@@ -42,7 +43,7 @@ const ShopPage = () => {
       const response = await fetch(`${apiBaseUrl}/products`);
       const data = await response.json();
 
-      // Tambahkan stok secara dinamis
+      // Tambahkan properti stok
       const updatedProducts = data.map((product) => ({
         ...product,
         stock: generateRandomStock(),
@@ -50,7 +51,7 @@ const ShopPage = () => {
 
       console.log("Produk setelah ditambahkan stok:", updatedProducts); // Debug
 
-      // Simpan produk ke local storage dan Redux
+      // Simpan produk ke localStorage dan Redux
       localStorage.setItem('products', JSON.stringify(updatedProducts));
       dispatch(setProducts(updatedProducts));
       setFilteredProducts(updatedProducts);
@@ -68,6 +69,7 @@ const ShopPage = () => {
     }
   };
 
+  // Mengubah kategori yang dipilih
   const handleCategoryChange = (category) => {
     setSelectedCategory(category);
     if (category === '') {
@@ -77,6 +79,7 @@ const ShopPage = () => {
     }
   };
 
+  // Menambahkan produk ke keranjang
   const handleAddToCart = (product) => {
     if (!product.stock || product.stock <= 0) {
       Swal.fire({
@@ -128,6 +131,7 @@ const ShopPage = () => {
     setSize('');
   };
 
+  // Membeli produk langsung
   const handleBuyNow = () => {
     if (!buyProduct || buyProduct.stock <= 0) {
       Swal.fire({
