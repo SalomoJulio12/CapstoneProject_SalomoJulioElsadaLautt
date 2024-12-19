@@ -117,7 +117,12 @@ const ShopPage = () => {
     if (productIndex !== -1) {
       updatedProducts[productIndex].stock -= 1; // Mengurangi stok
     }
-    localStorage.setItem('products', JSON.stringify(updatedProducts)); // Update stok produk di localStorage
+
+    // Simpan kembali produk yang sudah terupdate di localStorage
+    localStorage.setItem('products', JSON.stringify(updatedProducts));
+
+    // Update Redux dengan produk yang telah terupdate
+    dispatch(setProducts(updatedProducts));
 
     Swal.fire({
       title: 'Added to Cart!',
