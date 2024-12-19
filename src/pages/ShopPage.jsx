@@ -27,13 +27,19 @@ const ShopPage = () => {
         const response = await fetch(`${apiBaseUrl}/products`);
         const data = await response.json();
 
+        // Menambahkan stok default ke setiap produk
+        const updatedProducts = data.map((product) => ({
+          ...product,
+          stock: 10, // Stok default 10 untuk setiap produk
+        }));
+
         // Simpan ke localStorage dan Redux
-        localStorage.setItem('products', JSON.stringify(data));
-        dispatch(setProducts(data)); // Update Redux dengan data dari API
-        setFilteredProducts(data);
+        localStorage.setItem('products', JSON.stringify(updatedProducts));
+        dispatch(setProducts(updatedProducts)); // Update Redux dengan data produk yang sudah diupdate stoknya
+        setFilteredProducts(updatedProducts);
 
         // Ambil kategori unik
-        const uniqueCategories = [...new Set(data.map((product) => product.category))];
+        const uniqueCategories = [...new Set(updatedProducts.map((product) => product.category))];
         setCategories(uniqueCategories);
       } catch (error) {
         console.error('Error loading products:', error);
