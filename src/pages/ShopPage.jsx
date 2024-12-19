@@ -74,7 +74,7 @@ const ShopPage = () => {
   };
 
   const handleAddToCart = (product) => {
-    if (product.stock <= 0) {
+    if (!product.stock || product.stock <= 0) {
       Swal.fire({
         title: 'Out of Stock!',
         text: 'This product is out of stock.',
@@ -82,18 +82,6 @@ const ShopPage = () => {
         confirmButtonText: 'OK',
       });
       return; // Jangan tambahkan ke cart jika stok habis
-    }
-
-    if (product.category === "men's clothing" || product.category === "women's clothing") {
-      if (!size) {
-        Swal.fire({
-          title: 'Size Required!',
-          text: 'Please select a size before adding to the cart.',
-          icon: 'info',
-          confirmButtonText: 'OK',
-        });
-        return; // Jangan tambahkan ke cart jika ukuran belum dipilih
-      }
     }
 
     const cart = JSON.parse(localStorage.getItem('cart')) || [];
@@ -134,19 +122,7 @@ const ShopPage = () => {
   };
 
   const handleBuyNow = () => {
-    if (!isLoggedIn) {
-      Swal.fire({
-        title: 'You need to log in!',
-        text: 'Please log in to proceed with the purchase.',
-        icon: 'warning',
-        confirmButtonText: 'Go to Login',
-      }).then(() => {
-        window.location.href = '/login'; // Arahkan ke halaman login
-      });
-      return;
-    }
-
-    if (buyProduct && buyProduct.stock <= 0) {
+    if (!buyProduct || buyProduct.stock <= 0) {
       Swal.fire({
         title: 'Out of Stock!',
         text: 'This product is out of stock.',
@@ -154,18 +130,6 @@ const ShopPage = () => {
         confirmButtonText: 'OK',
       });
       return; // Jangan lanjutkan jika stok habis
-    }
-
-    if (buyProduct.category === "men's clothing" || buyProduct.category === "women's clothing") {
-      if (!size) {
-        Swal.fire({
-          title: 'Size Required!',
-          text: 'Please select a size before confirming your purchase.',
-          icon: 'info',
-          confirmButtonText: 'OK',
-        });
-        return;
-      }
     }
 
     Swal.fire({
