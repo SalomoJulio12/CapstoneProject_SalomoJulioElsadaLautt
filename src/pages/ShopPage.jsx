@@ -17,18 +17,46 @@ const ShopPage = () => {
   const [quantity, setQuantity] = useState(1);
   const [size, setSize] = useState('');
 
-  // Memuat produk dari localStorage dan update di Redux saat pertama kali render
+  // Default API URL jika environment variables tidak tersedia
+  const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || 'https://fakestoreapi.com';
+
+  // Memuat produk dari API jika localStorage kosong
   useEffect(() => {
-    const loadProducts = () => {
-      const storedProducts = JSON.parse(localStorage.getItem('products')) || [];
-      dispatch(setProducts(storedProducts)); // Update Redux dengan produk yang ada di localStorage
+    const loadProductsFromAPI = async () => {
+      try {
+        const response = await fetch(`${apiBaseUrl}/products`);
+        const data = await response.json();
+
+        // Simpan ke localStorage dan Redux
+        localStorage.setItem('products', JSON.stringify(data));
+        dispatch(setProducts(data)); // Update Redux dengan data dari API
+        setFilteredProducts(data);
+
+        // Ambil kategori unik
+        const uniqueCategories = [...new Set(data.map((product) => product.category))];
+        setCategories(uniqueCategories);
+      } catch (error) {
+        console.error('Error loading products:', error);
+        Swal.fire({
+          title: 'Error!',
+          text: 'Failed to load products from the server.',
+          icon: 'error',
+          confirmButtonText: 'OK',
+        });
+      }
+    };
+
+    // Cek localStorage untuk data produk
+    const storedProducts = JSON.parse(localStorage.getItem('products'));
+    if (storedProducts && storedProducts.length > 0) {
+      dispatch(setProducts(storedProducts)); // Update Redux dengan produk dari localStorage
       setFilteredProducts(storedProducts);
       const uniqueCategories = [...new Set(storedProducts.map((product) => product.category))];
       setCategories(uniqueCategories);
-    };
-
-    loadProducts();
-  }, [dispatch]);
+    } else {
+      loadProductsFromAPI(); // Fetch dari API jika localStorage kosong
+    }
+  }, [apiBaseUrl, dispatch]);
 
   const handleCategoryChange = (category) => {
     setSelectedCategory(category);
@@ -62,7 +90,7 @@ const ShopPage = () => {
       cart.push({ ...product, quantity: 1, size });
     }
 
-    // Update cart di localStorage (stok tidak berubah)
+    // Update cart di localStorage
     localStorage.setItem('cart', JSON.stringify(cart));
 
     Swal.fire({
