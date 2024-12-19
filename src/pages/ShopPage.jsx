@@ -29,6 +29,7 @@ const ShopPage = () => {
         setFilteredProducts(storedProducts);
         const uniqueCategories = [...new Set(storedProducts.map((product) => product.category))];
         setCategories(uniqueCategories);
+        console.log('Produk dari localStorage:', storedProducts); // Log produk yang diambil dari localStorage
       } else {
         loadProductsFromAPI(); // Fetch dari API jika localStorage kosong
       }
@@ -52,6 +53,10 @@ const ShopPage = () => {
 
       // Simpan ke localStorage dan Redux
       localStorage.setItem('products', JSON.stringify(updatedProducts));
+
+      // Log untuk memeriksa apakah produk sudah berhasil disimpan di localStorage
+      console.log('Produk setelah disimpan di localStorage:', localStorage.getItem('products'));
+
       dispatch(setProducts(updatedProducts)); // Update Redux dengan data produk yang sudah diupdate stoknya
       setFilteredProducts(updatedProducts);
 
