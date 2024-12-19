@@ -52,7 +52,7 @@ const ShopPage = () => {
       console.log('Produk dengan stok:', updatedProducts);
 
       // Simpan ke localStorage dan Redux
-      localStorage.setItem('products', JSON.stringify(updatedProducts));
+      localStorage.setItem('products', JSON.stringify(updatedProducts)); // Simpan produk dengan stok di localStorage
 
       // Log untuk memeriksa apakah produk sudah berhasil disimpan di localStorage
       console.log('Produk setelah disimpan di localStorage:', localStorage.getItem('products'));
