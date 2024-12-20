@@ -3,9 +3,11 @@ import Swal from 'sweetalert2';
 
 const ProductDetail = ({ product, onClose }) => {
   const { title, price, description, image, category, rating, stock } = product;
+  // State untuk mengelola jumlah produk dan ukuran yang dipilih
   const [quantity, setQuantity] = useState(1);
   const [size, setSize] = useState('');
 
+  // Fungsi untuk menambahkan produk ke keranjang
   const handleAddToCart = () => {
     if (size === '' && (category === "men's clothing" || category === "women's clothing")) {
       Swal.fire({
@@ -17,6 +19,7 @@ const ProductDetail = ({ product, onClose }) => {
       return;
     }
 
+    // Validasi jika jumlah produk melebihi stok yang tersedia
     if (quantity > stock) {
       Swal.fire({
         title: 'Not enough stock!',
@@ -27,13 +30,14 @@ const ProductDetail = ({ product, onClose }) => {
       return;
     }
 
+    // Membuat objek produk untuk dimasukkan ke keranjang
     const cartItem = {
       ...product,
       quantity,
       size,
     };
 
-    // Menyimpan ke Local Storage
+    // Menyimpan produk ke Local Storage
     const cart = JSON.parse(localStorage.getItem('cart')) || [];
     const existingProductIndex = cart.findIndex(item => item.id === product.id && item.size === size);
     
