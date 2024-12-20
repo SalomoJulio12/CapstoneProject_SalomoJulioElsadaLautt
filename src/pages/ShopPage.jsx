@@ -17,14 +17,16 @@ const ShopPage = () => {
 
   const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || 'https://fakestoreapi.com';
 
+  // Fungsi untuk menghasilkan stok acak untuk setiap produk
   const generateRandomStock = () => Math.floor(Math.random() * 20) + 1;
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      const storedProducts = JSON.parse(localStorage.getItem('products'));
+      const storedProducts = JSON.parse(localStorage.getItem('products')); // Cek produk yang tersimpan di localStorage
       if (storedProducts && storedProducts.length > 0) {
+        // Jika produk ada di localStorage, gunakan data tersebut dan update Redux store
         dispatch(setProducts(storedProducts));
-        setFilteredProducts(storedProducts);
+        setFilteredProducts(storedProducts); // Filter produk sesuai kategori jika diperlukan
         const uniqueCategories = [...new Set(storedProducts.map((product) => product.category))];
         setCategories(uniqueCategories);
       } else {
@@ -33,11 +35,13 @@ const ShopPage = () => {
     }
   }, [dispatch]);
 
+  // Fungsi untuk memuat produk dari API
   const loadProductsFromAPI = async () => {
     try {
       const response = await fetch(`${apiBaseUrl}/products`);
       const data = await response.json();
 
+      // Menambahkan stok acak ke setiap produk yang diterima dari API
       const updatedProducts = data.map((product) => ({
         ...product,
         stock: generateRandomStock(),
@@ -45,10 +49,12 @@ const ShopPage = () => {
 
       console.log("Produk setelah ditambahkan stok:", updatedProducts);
 
+      // Menyimpan produk yang dimuat ke localStorage dan Redux
       localStorage.setItem('products', JSON.stringify(updatedProducts));
       dispatch(setProducts(updatedProducts));
       setFilteredProducts(updatedProducts);
 
+      // Menyaring kategori unik dari produk
       const uniqueCategories = [...new Set(updatedProducts.map((product) => product.category))];
       setCategories(uniqueCategories);
     } catch (error) {
@@ -62,25 +68,28 @@ const ShopPage = () => {
     }
   };
 
+  // Fungsi untuk mengubah kategori yang dipilih
   const handleCategoryChange = (category) => {
     setSelectedCategory(category);
     if (category === '') {
-      setFilteredProducts(products);
+      setFilteredProducts(products); // Tampilkan semua produk jika kategori tidak dipilih
     } else {
+      // Filter produk berdasarkan kategori yang dipilih
       setFilteredProducts(products.filter((product) => product.category === category));
     }
   };
 
+  // Fungsi untuk menambahkan produk ke keranjang belanja
   const handleAddToCart = (product) => {
-    const cart = JSON.parse(localStorage.getItem('cart')) || [];
+    const cart = JSON.parse(localStorage.getItem('cart')) || []; // Ambil data keranjang dari localStorage atau buat array kosong
     const existingProductIndex = cart.findIndex(
-      (item) => item.id === product.id && item.size === size
+      (item) => item.id === product.id && item.size === size // Cek apakah produk sudah ada di keranjang
     );
 
     if (existingProductIndex !== -1) {
-      cart[existingProductIndex].quantity += 1;
+      cart[existingProductIndex].quantity += 1; // Tambahkan jumlah jika produk sudah ada di keranjang
     } else {
-      cart.push({ ...product, quantity: 1, size });
+      cart.push({ ...product, quantity: 1, size }); // Tambahkan produk ke keranjang jika belum ada
     }
 
     localStorage.setItem('cart', JSON.stringify(cart));
