@@ -2,29 +2,31 @@ import React, { useEffect, useState } from 'react';
 import { FaTrash } from 'react-icons/fa';
 import Swal from 'sweetalert2';
 import { useNavigate } from 'react-router-dom';
-import { useDispatch } from 'react-redux'; // Import useDispatch untuk mengirim action updateStock
-import { updateStock } from '../store/redux/actions'; // Import action updateStock
+import { useDispatch } from 'react-redux'; 
+import { updateStock } from '../store/redux/actions'; 
 
 const CartPage = () => {
   const [cartItems, setCartItems] = useState([]);
-  const navigate = useNavigate(); // Untuk redirect setelah checkout
-  const dispatch = useDispatch(); // Deklarasi dispatch
+  const navigate = useNavigate(); // Hook untuk navigasi
+  const dispatch = useDispatch(); // Hook untuk dispatch Redux action
 
   useEffect(() => {
     const cart = JSON.parse(localStorage.getItem('cart')) || [];
     setCartItems(cart);
   }, []);
 
+  // Fungsi untuk menghitung subtotal harga keranjang
   const calculateSubtotal = () => {
     return cartItems.reduce((total, item) => total + item.price * item.quantity, 0);
   };
 
+  // Fungsi untuk menangani perubahan jumlah item di keranjang
   const handleQuantityChange = (id, size, delta, stock) => {
     const updatedCart = cartItems.map((item) =>
       item.id === id && item.size === size
         ? {
             ...item,
-            quantity: Math.max(1, Math.min(item.quantity + delta, stock)),
+            quantity: Math.max(1, Math.min(item.quantity + delta, stock)), // Memastikan jumlah tidak kurang dari 1 atau lebih dari stok
           }
         : item
     );
@@ -33,17 +35,19 @@ const CartPage = () => {
     localStorage.setItem('cart', JSON.stringify(updatedCart)); // Update localStorage
   };
 
+  // Fungsi untuk menghapus item dari keranjang
   const handleRemove = (id, size) => {
     const updatedCart = cartItems.filter((item) => !(item.id === id && item.size === size));
     setCartItems(updatedCart);
     localStorage.setItem('cart', JSON.stringify(updatedCart)); // Update localStorage
   };
 
+  // Fungsi untuk melakukan checkout
   const handleCheckout = () => {
     const updatedCart = [...cartItems];
-    let insufficientStockItems = [];
+    let insufficientStockItems = []; // Array untuk menyimpan item dengan stok tidak cukup
     
-    // Periksa stok dan update cart
+    // Periksa stok produk sebelum checkout
     updatedCart.forEach((item) => {
       const productStock = JSON.parse(localStorage.getItem('products'));
       const productIndex = productStock.findIndex((product) => product.id === item.id);
@@ -57,7 +61,7 @@ const CartPage = () => {
     // Simpan cart yang telah diperbarui ke localStorage
     localStorage.setItem('cart', JSON.stringify(updatedCart));
 
-    // Update stok di localStorage hanya setelah checkout
+    // Kurangi stok produk berdasarkan item yang di-checkout
     let productStock = JSON.parse(localStorage.getItem('products'));
     updatedCart.forEach((item) => {
       const productIndex = productStock.findIndex((product) => product.id === item.id);
@@ -87,9 +91,8 @@ const CartPage = () => {
         icon: 'success',
         confirmButtonText: 'OK',
       }).then(() => {
-        // Setelah checkout selesai, hapus produk dari cart di localStorage
         localStorage.removeItem('cart');
-        navigate('/'); // Arahkan ke halaman utama setelah checkout
+        navigate('/'); 
       });
     }
   };
