@@ -31,10 +31,10 @@ export const logout = () => {
 // Action untuk login default
 export const defaultLogin = (username, password) => {
   return (dispatch) => {
-    // Kredensial default
+    // Kredensial default yang digunakan untuk login (username dan password)
     const defaultUser = { username: 'johnd', password: 'm38rmF$', email: 'johnd@example.com' };
 
-    // Validasi username dan password
+    // Validasi kredensial yang dimasukkan dengan kredensial default
     if (username === defaultUser.username && password === defaultUser.password) {
       const userData = { username: defaultUser.username, email: defaultUser.email };
       dispatch(login(userData));
@@ -44,7 +44,8 @@ export const defaultLogin = (username, password) => {
   };
 };
 
+// Action creator untuk memperbarui stok produk
 export const updateStock = (updatedProducts) => ({
-  type: 'UPDATE_STOCK',
-  payload: updatedProducts,
+  type: 'UPDATE_STOCK', // Tipe aksi untuk memperbarui stok produk
+  payload: updatedProducts, // Mengirimkan data produk yang sudah diperbarui ke payload
 });
