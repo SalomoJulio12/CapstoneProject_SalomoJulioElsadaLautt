@@ -14,22 +14,22 @@ const Navbar = () => {
 
   const toggleMobileMenu = () => setIsMobileMenuOpen(!isMobileMenuOpen);
 
-  // Function to update cart item count
+  // Fungsi untuk menghitung jumlah item unik di keranjang
   const updateCartItemCount = () => {
-    const cart = JSON.parse(localStorage.getItem('cart')) || [];
+    const cart = JSON.parse(localStorage.getItem('cart')) || []; // Ambil data keranjang dari localStorage
     const uniqueProducts = new Set(cart.map(item => `${item.id}-${item.size || ''}`)); 
-    setCartItemCount(uniqueProducts.size); // Count unique products by ID + size
+    setCartItemCount(uniqueProducts.size); // Update state jumlah item unik
   };
 
-  // Initially set the cart count
+  // Efek samping untuk menghitung jumlah item saat komponen pertama kali di-render
   useEffect(() => {
     updateCartItemCount();
   }, []);
 
-  // Whenever the cart changes, we need to update the cart count
+  
   useEffect(() => {
     const handleStorageChange = () => {
-      updateCartItemCount(); // Update cart count on localStorage change
+      updateCartItemCount(); // Update jumlah item jika data di localStorage berubah
     };
     
     window.addEventListener('storage', handleStorageChange);
@@ -38,8 +38,10 @@ const Navbar = () => {
     };
   }, []);
 
+  // Fungsi untuk menangani klik ikon pengguna
   const handleUserClick = () => {
     if (!isLoggedIn) {
+      // Jika belum login, tampilkan notifikasi dan arahkan ke halaman login
       Swal.fire({
         title: 'You are not logged in!',
         text: 'You will be redirected to the login page.',
@@ -49,6 +51,7 @@ const Navbar = () => {
         navigate('/login');
       });
     } else {
+      // Jika sudah login, tampilkan ucapan selamat datang
       Swal.fire({
         title: 'Hello!',
         text: `Welcome back, ${user.username}!`,
@@ -58,6 +61,7 @@ const Navbar = () => {
     }
   };
 
+  // Fungsi untuk menangani logout
   const handleLogout = () => {
     Swal.fire({
       title: 'Are you sure?',
@@ -70,6 +74,7 @@ const Navbar = () => {
       cancelButtonText: 'Cancel',
     }).then((result) => {
       if (result.isConfirmed) {
+        // Jika dikonfirmasi, panggil aksi logout Redux dan arahkan ke halaman utama
         dispatch(logout());
         Swal.fire({
           title: 'Logged out successfully!',
