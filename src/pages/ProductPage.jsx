@@ -5,11 +5,11 @@ import { setProducts } from '../store/redux/actions';
 
 const ProductPage = () => {
   const { productId } = useParams();
-  const dispatch = useDispatch();
-  const products = useSelector((state) => state.products);
+  const dispatch = useDispatch(); // Hook untuk mengirim action Redux
+  const products = useSelector((state) => state.products); // Mengambil daftar produk dari Redux state
 
   useEffect(() => {
-    if (products.length === 0) {
+    if (products.length === 0) { // Cek apakah produk belum tersedia
       const fetchProducts = async () => {
         const response = await fetch('https://fakestoreapi.com/products');
         const data = await response.json();
@@ -19,6 +19,7 @@ const ProductPage = () => {
     }
   }, [dispatch, products.length]);
 
+  // Temukan produk berdasarkan productId
   const product = products.find((p) => p.id === Number(productId));
 
   if (!product) return <div className="text-center">Loading...</div>;
