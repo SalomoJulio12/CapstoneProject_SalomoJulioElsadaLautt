@@ -6,17 +6,18 @@ const initialAuthState = {
   user: JSON.parse(localStorage.getItem('user')) || null,    // Ambil user dari localStorage
 };
 
+// Reducer untuk menangani status autentikasi
 const authReducer = (state = initialAuthState, action) => {
   switch (action.type) {
     case 'LOGIN':
       return {
-        isLoggedIn: true,
-        user: action.payload,
+        isLoggedIn: true, // Mengubah status isLoggedIn menjadi true saat pengguna login
+        user: action.payload, // Menyimpan data pengguna dari payload aksi
       };
     case 'LOGOUT':
       return {
-        isLoggedIn: false,
-        user: null,
+        isLoggedIn: false, // Mengubah status isLoggedIn menjadi false saat pengguna logout
+        user: null, // Menghapus data pengguna
       };
     default:
       return state;
@@ -24,15 +25,16 @@ const authReducer = (state = initialAuthState, action) => {
 };
 
 const initialState = {
-  products: [],
+  products: [], // Inisialisasi state produk sebagai array kosong
 };
 
+// Reducer untuk menangani produk
 const productReducer = (state = initialState, action) => {
   switch (action.type) {
     case 'SET_PRODUCTS':
       return {
-        ...state,
-        products: action.payload,
+        ...state, // Mempertahankan state lama (produk sebelumnya)
+        products: action.payload, // Mengupdate produk dengan data produk yang diterima dari payload aksi
       };
     case 'UPDATE_STOCK':
       return {
@@ -46,8 +48,8 @@ const productReducer = (state = initialState, action) => {
 
 // Gabungkan semua reducer
 const rootReducer = combineReducers({
-  products: productReducer,
-  auth: authReducer,
+  products: productReducer, // Menambahkan reducer produk
+  auth: authReducer, // Menambahkan reducer autentikasi
 });
 
 export default rootReducer;
