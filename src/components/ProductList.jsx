@@ -2,8 +2,10 @@ import React, { useEffect, useState } from "react";
 import ProductCard from "./ProductCard";
 
 const ProductList = () => {
-  const [products, setProducts] = useState([]);
+  // State untuk menyimpan data produk
+  const [products, setProducts] = useState([]); // Inisialisasi state produk sebagai array kosong
 
+  // Menggunakan useEffect untuk mengambil data produk dari API saat komponen pertama kali di-render
   useEffect(() => {
     const fetchProducts = async () => {
       const response = await fetch("https://fakestoreapi.com/products");
